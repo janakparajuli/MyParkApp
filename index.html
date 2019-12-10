@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>My Park App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
+    
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    
+    
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+    <style>
+    #map{height: 400px;}
+    </style>
+</head>
+
+<body>
+    <div data-role="page" id="home">
+        <div data-role="header">
+            <h1>My Park App</h1>
+            <a href="#" id="refresh" data-icon="recycle" class="ui-btn-right">Refresh</a>
+        </div>
+
+        <div data-role="content">
+            <ul id= "parks_list" data-role="listview">
+                    <!-- <li><a href="#details">Castellon de la Plana<span class="ui-li-count">13</span></a></li>
+                    <li><a href="#details">Almassora<span class="ui-li-count">12.9</span></a></li>
+                    <li><a href="#details">London<span class="ui-li-count">0</span></a></li> -->
+            </ul>
+        </div>
+    </div>
+
+    <div data-role="page" id="details">
+            <div data-role="header" data-add-back-btn="true">
+            </div>
+            <div data-role="content">
+                <h4 id="parkName"></h4>
+                <div id='map'>
+                    <p>This page is for map</p>
+                </div>
+                
+            </div>
+
+        </div>
+</body>
+
+<script src="myscript.js"></script>
+</html>
