@@ -1,0 +1,3 @@
+1. DataTable: https://datatables.net/download/
+2. JQuery Examples: https://riptutorial.com/jquery/example/5897/plugins---getting-started
+3. Table plugins: https://wpmanageninja.com/10-best-free-jquery-table-plugins/
