@@ -25,17 +25,29 @@ $(document).on("click", "#refresh", function() {
     url: navigator.geolocation.getCurrentPosition(getLocation),
     //on success
     success: function(data){
+      let search_url, slide_url, query_url;
       $distance=$('#slider-1')[0].value;
       myLon=lng;myLat=lat;
       console.log(`My myLon myLat is ${myLon} and ${myLat}`);
       $viewbox=computeViewBox(myLon,myLat,$distance);
+      //Access from search bar https://nominatim.openstreetmap.org/search.php?q=parks+in+castellon&polygon_geojson=1&viewbox=
+      $place=$('#text-4')[0].value;
+      debugger;
+      search_url=`https://nominatim.openstreetmap.org/search.php?q=parks+${$place}&format=json&polygon_geojson=1`;
+      slide_url=`https://nominatim.openstreetmap.org/search.php?q=parks&format=json&polygon_geojson=1&viewbox=${$viewbox}&bounded=1`;
+      if($place!=""){
+        query_url=search_url;
+        console.log(`sending search url`);
+      }else{query_url=slide_url;
+        console.log(`sending slide url`);
+      }
 
   $.ajax({
     type: "GET",
-    url: `https://nominatim.openstreetmap.org/search.php?&format=json&polygon_geojson=1&viewbox=${$viewbox}&bounded=1`,
+    url: query_url,
     data: {
        //format: "json",
-       q: "parks"
+       //q: "parks"
      },
     //dataType: 'jsonp',
     success: function(data) {
