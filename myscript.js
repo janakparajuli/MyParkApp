@@ -9,12 +9,11 @@ $("#refresh").animate({
   width: "7em",
   height: "1.5em"
 });
-let url, myLlat, myLng;
+let url, myLat, myLon;
 //park_url=https://nominatim.openstreetmap.org/search.php?q=parks&format=json&polygon_geojson=1&viewbox=
 $(document).on("click", "#refresh", function() {
   //Prevent the usual navigation behaviour
   event.preventDefault();
-  //debugger;
   // get the API result via jQuery.ajax
   $.mobile.loading("show", {
     text: "Loading List of Parks",
@@ -30,9 +29,9 @@ $(document).on("click", "#refresh", function() {
       myLon=lng;myLat=lat;
       console.log(`My myLon myLat is ${myLon} and ${myLat}`);
       $viewbox=computeViewBox(myLon,myLat,$distance);
-      //Access from search bar https://nominatim.openstreetmap.org/search.php?q=parks+in+castellon&polygon_geojson=1&viewbox=
+      //Access from search bar 
       $place=$('#text-4')[0].value;
-      debugger;
+
       search_url=`https://nominatim.openstreetmap.org/search.php?q=parks+${$place}&format=json&polygon_geojson=1`;
       slide_url=`https://nominatim.openstreetmap.org/search.php?q=parks&format=json&polygon_geojson=1&viewbox=${$viewbox}&bounded=1`;
       if($place!=""){
@@ -76,9 +75,11 @@ $(document).on("pagebeforeshow", "#home", function() {
     $.mobile.changePage("#map_display");
   });
 });
+let map, dir;
 map = L.map("map", {
-  zoom: 18,
+  zoom: 15,
   center: [41.43401555, 2.11618445]
+  //center:[57.74, 11.94] //map quest
   // center: [-0.0380158229338167,39.9927254 ] 2.11618445,41.43401555
 });
 
@@ -87,6 +88,15 @@ L.tileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   subdomains: ["a", "b", "c"]
 }).addTo(map);
+
+routingControl = L.Routing.control({
+  router: L.Routing.mapbox("pk.eyJ1IjoiamFuYWtwYXJhanVsaSIsImEiOiJjaWdtMWd2eWUwMjRvdXJrcjVhbTFvcmszIn0.jRIRtmgCm5waI7RXih3t5A"),
+  waypoints: [
+    //L.latLng(41.43401555, 2.11618445),
+    L.latLng(41.43451555, 2.11658445)
+  ]
+}).addTo(map);
+
 
 $(document).on("pagebeforeshow", "#map_display", function(e) {
   e.preventDefault();
@@ -99,9 +109,10 @@ $(document).on("pagebeforeshow", "#map_display", function(e) {
     });
     let url;
 
-    if (typeof currentPark !== "undefined") {console.log('inside if'+currentPark);
+    if (typeof currentPark !== "undefined") {
+
       url = `https://nominatim.openstreetmap.org/details.php?osmtype=${currentPark.osm_type[0].toUpperCase()}&osmid=${currentPark.osm_id}&format=json&polygon_geojson=1`;
-    } else {console.log('inside else');
+    } else {
       url = `https://nominatim.openstreetmap.org/details.php?osmtype=W&osmid=33884330&format=json&polygon_geojson=1`;
     }
     $.ajax({
@@ -111,14 +122,26 @@ $(document).on("pagebeforeshow", "#map_display", function(e) {
         console.log("This is d:" + d);
         $.mobile.loading("hide");
         map.invalidateSize();
-        map.setView(d.centroid.coordinates.reverse());
-        L.marker(d.centroid.coordinates.reverse())
-          .bindPopup("Name:" + d.localname)
-          .addTo(map);
+        // map.setView(d.centroid.coordinates);
+        map.setView([myLat,myLon]);
+        debugger;
+        markPoint=[myLat,myLon];
+        let mark=L.marker(markPoint.reverse()).bindPopup("I am here").openPopup();
+        mark.addTo(map);
+
         park = L.geoJSON(d.geometry);
         map.addLayer(park);
+        
         park.on("click", function() {
           $.mobile.changePage("#park_details");
+        });
+        // console.log("This is my lat for routing"+myLat);
+        //a = [L.latLng(myLat,myLon),L.latLng(d.centroid.coordinates)]
+        //routingControl.setWaypoints(a)
+        $("#dir-btn").on("click",function(){
+          $waypoints=[L.latLng(d.centroid.coordinates.reverse()), L.latLng(myLat,myLon)];
+          console.log('This is waypoints: '+$waypoints);
+          routingControl.setWaypoints($waypoints);
         });
 
       },

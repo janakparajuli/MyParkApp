@@ -6,15 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
     <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
-    <link rel="stylesheet" type="text/css"
-        href="https://cdn.datatables.net/v/ju/jq-3.3.1/dt-1.10.20/af-2.3.4/b-1.6.1/r-2.2.3/datatables.min.css" />
+        <!--Leaflet Routing Machine css-->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+        <!--Leaflet Routing Machine css-->
+    <!--data tabele <link rel="stylesheet" type="text/css"
+        href="https://cdn.datatables.net/v/ju/jq-3.3.1/dt-1.10.20/af-2.3.4/b-1.6.1/r-2.2.3/datatables.min.css" /> -->
     <link rel="stylesheet" href="mycss.css" />
 
-    <script type="text/javascript"
-        src="https://cdn.datatables.net/v/ju/jq-3.3.1/dt-1.10.20/af-2.3.4/b-1.6.1/r-2.2.3/datatables.min.js"></script>
+    <!--Map Quest Plugin-->
+    <!-- <script src="https://www.mapquestapi.com/sdk/leaflet/v2.2/mq-map.js?key=ltsAJUPvHE6kKHbklFn5ZOzyihVtZyV4"></script>
+    <script src="https://www.mapquestapi.com/sdk/leaflet/v2.2/mq-routing.js?key=ltsAJUPvHE6kKHbklFn5ZOzyihVtZyV4"></script>
+    Map Quest Plugin -->
+    <script type="text/javascript" src="https://cdn.datatables.net/v/ju/jq-3.3.1/dt-1.10.20/af-2.3.4/b-1.6.1/r-2.2.3/datatables.min.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+        <!--Leaflet Routing Machine js-->
+        <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+        <!--Leaflet Routing Machine js-->
     <style>
         #map {
             height: 48em;
@@ -51,7 +60,11 @@
         <div data-role="header" data-add-back-btn="true">
         </div>
         <div data-role="content">
-            <h4 id="parkName"></h4>
+            <!-- <h4 id="parkName"></h4> -->
+            <div> 
+            <!-- class="leaflet-top leaflet-right" id="custom-border-radius" -->
+                <button id="dir-btn" class="ui-btn ui-btn-a">Get Direction</button>
+            </div>
             <div id='map'>
 
             </div>
