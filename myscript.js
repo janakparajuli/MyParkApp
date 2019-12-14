@@ -29,7 +29,7 @@ $(document).on("click", "#refresh", function() {
       myLon=lng;myLat=lat;
       console.log(`My myLon myLat is ${myLon} and ${myLat}`);
       $viewbox=computeViewBox(myLon,myLat,$distance);
-      //Access from search bar 
+      //Access from search bar
       $amenity=$('#select-custom-2')[0].value;
       $amenity=parseInt($amenity);
       switch($amenity) {
@@ -144,7 +144,6 @@ $(document).on("pagebeforeshow", "#map_display", function(e) {
         console.log("This is d:" + d);
         $.mobile.loading("hide");
         map.invalidateSize();
-        //debugger;
         amenityCoordinates=d.centroid.coordinates;
         backUpAmenityCoordinatesLonLat=amenityCoordinates;
         //amenityCoordinatesLon=d.centroid.coordinates.reverse();
@@ -245,7 +244,6 @@ $(document).on("pagebeforeshow", "#amenity_details", function(e) {
         }
         makeTable($("#detail"), dataObj);
         //amenityDescription(d);
-        // debugger;
         // $('#map').append($(d));
       },
       fail: function(xhr, textStatus, errorThrown) {
@@ -297,7 +295,6 @@ function computeViewBox(y0,x0,d){
 //Populate List method
 function PopulateList(data) {
   for (let i = 0; i < data.length; i++) {
-    //debugger;
     //console.log(data[i].display_name);
     amenities = data;
     //Remove Previous Stations
@@ -306,12 +303,12 @@ function PopulateList(data) {
     //console.log(stations);
     $.each(amenities, function(index, amenity) {
       let amenity_name = amenity.display_name.split(",");
-      distanceToamenity(myLon,myLat, amenity.lon, amenity.lat);
+      let distance=distanceToamenity(myLon,myLat, amenity.lon, amenity.lat);
       console.log(`This is lng: ${myLon}`);
       $("#amenities_list").append(
         `<li><a id="to_map_display" href="#">
           ${amenity_name[0]}
-          <span id="${index}" class="ui-li-count"></span>
+          <span id="${index}" class="ui-li-count">${distance.toFixed(2)}km</span>
           <p><strong>${amenity_name[1]}</strong></p>
           <p><strong>${amenity_name[2]}</strong></p>
           </a></li>`
@@ -321,8 +318,18 @@ function PopulateList(data) {
     $("#amenities_list").listview("refresh");
   }
 }
-function distanceToamenity(y0,x0,y1,x1){
+function distanceToamenity(y1,x1,y2,x2){
   //var φ1 = lat1.toRadians(), φ2 = lat2.toRadians(), Δλ = (lon2-lon1).toRadians(), R = 6371e3; // gives d in metres
 //var d = Math.acos( Math.sin(φ1)*Math.sin(φ2) + Math.cos(φ1)*Math.cos(φ2) * Math.cos(Δλ) ) * R;
+  const R=6371;
+  let d;
+  let φ1 = x1*(Math.PI/180);
+  let φ2 = x2*(Math.PI/180);
+  let λ1 = y1*(Math.PI/180);
+  let λ2 = y2*(Math.PI/180);
+
+  let Δλ = λ2-λ1;
+  d=Math.acos( Math.sin(φ1)*Math.sin(φ2) + Math.cos(φ1)*Math.cos(φ2) * Math.cos(Δλ)) * R;
+  return d;
 
 }
