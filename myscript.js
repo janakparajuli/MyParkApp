@@ -1,22 +1,22 @@
 $access_key="bd628cc94539482fb9fd50afd7b06976";
 //871cbf254c2d49dd9da20f9e88229e7c
-let currentPark;
+let currentamenity;
 $.fn.highlight = function() {
   this.css({ "background-color": "rgb(245, 228, 181)" });
 };
 $("#refresh").highlight();
 $("#refresh").animate({
-  width: "7em",
+  width: "9em",
   height: "1.5em"
 });
 let url, myLat, myLon;
-//park_url=https://nominatim.openstreetmap.org/search.php?q=parks&format=json&polygon_geojson=1&viewbox=
+//amenity_url=https://nominatim.openstreetmap.org/search.php?q=amenities&format=json&polygon_geojson=1&viewbox=
 $(document).on("click", "#refresh", function() {
   //Prevent the usual navigation behaviour
   event.preventDefault();
   // get the API result via jQuery.ajax
   $.mobile.loading("show", {
-    text: "Loading List of Parks",
+    text: "Loading Amenities",
     textVisible: true
   });
   $.ajax({
@@ -24,16 +24,37 @@ $(document).on("click", "#refresh", function() {
     url: navigator.geolocation.getCurrentPosition(getLocation),
     //on success
     success: function(data){
-      let search_url, slide_url, query_url;
+      let search_url, slide_url, query_url,query_amenity='';
       $distance=$('#slider-1')[0].value;
       myLon=lng;myLat=lat;
       console.log(`My myLon myLat is ${myLon} and ${myLat}`);
       $viewbox=computeViewBox(myLon,myLat,$distance);
       //Access from search bar 
+      $amenity=$('#select-custom-2')[0].value;
+      $amenity=parseInt($amenity);
+      switch($amenity) {
+        case 1:
+          query_amenity='park';
+          break;
+        case 2:
+          query_amenity='hospital';
+          break;
+        case 3:
+          query_amenity='pub';
+          break;
+        case 4:
+          query_amenity='hotel';
+          break;
+        case 5:
+          query_amenity='school';
+          break;
+        default:
+          query_amenity='amenity';
+      }
       $place=$('#text-4')[0].value;
 
-      search_url=`https://nominatim.openstreetmap.org/search.php?q=parks+${$place}&format=json&polygon_geojson=1`;
-      slide_url=`https://nominatim.openstreetmap.org/search.php?q=parks&format=json&polygon_geojson=1&viewbox=${$viewbox}&bounded=1`;
+      search_url=`https://nominatim.openstreetmap.org/search.php?q=${query_amenity}+in+${$place}&format=json&polygon_geojson=1`;
+      slide_url=`https://nominatim.openstreetmap.org/search.php?q=${query_amenity}&format=json&polygon_geojson=1&viewbox=${$viewbox}&bounded=1`;
       if($place!=""){
         query_url=search_url;
         console.log(`sending search url`);
@@ -46,13 +67,13 @@ $(document).on("click", "#refresh", function() {
     url: query_url,
     data: {
        //format: "json",
-       //q: "parks"
+       //q: "amenities"
      },
     //dataType: 'jsonp',
     success: function(data) {
       $.mobile.loading("hide");
       PopulateList(data);
-      $("#parks_list").show();
+      $("#amenities_list").show();
     },
     fail: function() {
       $.mobile.loading("hide");
@@ -64,13 +85,13 @@ $(document).on("click", "#refresh", function() {
 
 //Navigate to map_display
 $(document).on("pagebeforeshow", "#home", function() {
-  $("#parks_list").hide();
+  $("#amenities_list").hide();
   $(document).on("click", "#to_map_display", function(e) {
     e.preventDefault();
     e.stopImmediatePropagation();
     //store some data
-    // currentPark = parks[e.target.children[0].id];
-    currentPark = parks[e.currentTarget.children[0].id];
+    // currentamenity = amenities[e.target.children[0].id];
+    currentamenity = amenities[e.currentTarget.children[0].id];
     //Change to map_display page
     $.mobile.changePage("#map_display");
   });
@@ -94,7 +115,8 @@ routingControl = L.Routing.control({
   waypoints: [
     //L.latLng(41.43401555, 2.11618445),
     L.latLng(41.43451555, 2.11658445)
-  ]
+  ],
+  routeWhileDragging:true
 }).addTo(map);
 
 
@@ -109,9 +131,9 @@ $(document).on("pagebeforeshow", "#map_display", function(e) {
     });
     let url;
 
-    if (typeof currentPark !== "undefined") {
+    if (typeof currentamenity !== "undefined") {
 
-      url = `https://nominatim.openstreetmap.org/details.php?osmtype=${currentPark.osm_type[0].toUpperCase()}&osmid=${currentPark.osm_id}&format=json&polygon_geojson=1`;
+      url = `https://nominatim.openstreetmap.org/details.php?osmtype=${currentamenity.osm_type[0].toUpperCase()}&osmid=${currentamenity.osm_id}&format=json&polygon_geojson=1`;
     } else {
       url = `https://nominatim.openstreetmap.org/details.php?osmtype=W&osmid=33884330&format=json&polygon_geojson=1`;
     }
@@ -122,24 +144,32 @@ $(document).on("pagebeforeshow", "#map_display", function(e) {
         console.log("This is d:" + d);
         $.mobile.loading("hide");
         map.invalidateSize();
+        //debugger;
+        amenityCoordinates=d.centroid.coordinates;
+        backUpAmenityCoordinatesLonLat=amenityCoordinates;
+        //amenityCoordinatesLon=d.centroid.coordinates.reverse();
+        console.log(`The amenity coor lon lat is: ${amenityCoordinates} and that lon latis:`);
         // map.setView(d.centroid.coordinates);
-        map.setView([myLat,myLon]);
-        debugger;
+        map.setView(amenityCoordinates.reverse());
+        console.log(`Now the amenity lon lat is: ${amenityCoordinates}`);
         markPoint=[myLat,myLon];
-        let mark=L.marker(markPoint.reverse()).bindPopup("I am here").openPopup();
-        mark.addTo(map);
+        let myPos=L.marker(markPoint).bindPopup("I am here").openPopup();
+        myPos.addTo(map);
+        let amenityPos=L.marker(d.centroid.coordinates).bindPopup(d.localname).openPopup();
+        amenityPos.addTo(map);
 
-        park = L.geoJSON(d.geometry);
-        map.addLayer(park);
-        
-        park.on("click", function() {
-          $.mobile.changePage("#park_details");
+        amenity = L.geoJSON(d.geometry);
+        map.addLayer(amenity);
+
+        amenity.on("click", function() {
+          $.mobile.changePage("#amenity_details");
         });
         // console.log("This is my lat for routing"+myLat);
         //a = [L.latLng(myLat,myLon),L.latLng(d.centroid.coordinates)]
         //routingControl.setWaypoints(a)
         $("#dir-btn").on("click",function(){
-          $waypoints=[L.latLng(d.centroid.coordinates.reverse()), L.latLng(myLat,myLon)];
+          map.setView([myLat,myLon]);
+          $waypoints=[L.latLng(myLat,myLon),L.latLng(amenityCoordinates)];
           console.log('This is waypoints: '+$waypoints);
           routingControl.setWaypoints($waypoints);
         });
@@ -153,7 +183,7 @@ $(document).on("pagebeforeshow", "#map_display", function(e) {
   });
 });
 //https://nominatim.openstreetmap.org/details.php?osmtype=W&osmid=33884330&class=leisure
-$(document).on("pagebeforeshow", "#park_details", function(e) {
+$(document).on("pagebeforeshow", "#amenity_details", function(e) {
   e.preventDefault();
   if($('.CSSTableGenerator')!=null){$('.CSSTableGenerator').remove();}
   $(function() {
@@ -163,9 +193,9 @@ $(document).on("pagebeforeshow", "#park_details", function(e) {
     });
    
     let url;
-    if (typeof currentPark !== "undefined") {
-      url = `https://nominatim.openstreetmap.org/details.php?osmtype=${currentPark.osm_type[0].toUpperCase()}&osmid=${currentPark.osm_id}&format=json`;
-      //debugger;
+    if (typeof currentamenity !== "undefined") {
+      url = `https://nominatim.openstreetmap.org/details.php?osmtype=${currentamenity.osm_type[0].toUpperCase()}&osmid=${currentamenity.osm_id}&format=json`;
+
     } else {
       url = `https://nominatim.openstreetmap.org/details.php?osmtype=W&osmid=123759217&format=json`;
     }
@@ -177,7 +207,7 @@ $(document).on("pagebeforeshow", "#park_details", function(e) {
         let data = [
           [
             "Name",
-            "Park ID",
+            "Amenity ID",
             "Type",
             "Last Updated",
             "Category",
@@ -214,7 +244,7 @@ $(document).on("pagebeforeshow", "#park_details", function(e) {
           dataObj[data[0][i]] = data[1][i];
         }
         makeTable($("#detail"), dataObj);
-        //parkDescription(d);
+        //amenityDescription(d);
         // debugger;
         // $('#map').append($(d));
       },
@@ -263,37 +293,35 @@ function computeViewBox(y0,x0,d){
   $vb.push($lngleft, $lattop, $lngright,$latdown);
   console.log(`The bb is: ${$vb}`);
   return $vb;
-
 }
 //Populate List method
 function PopulateList(data) {
   for (let i = 0; i < data.length; i++) {
-    //console.log(data[i].display_name);
-    parks = data;
     //debugger;
+    //console.log(data[i].display_name);
+    amenities = data;
     //Remove Previous Stations
-    $("#parks_list li").remove();
+    $("#amenities_list li").remove();
     //Add new stations to the list
     //console.log(stations);
-    $.each(parks, function(index, park) {
-      let park_name = park.display_name.split(",");
-      distanceToPark(myLon,myLat, park.lon, park.lat);
+    $.each(amenities, function(index, amenity) {
+      let amenity_name = amenity.display_name.split(",");
+      distanceToamenity(myLon,myLat, amenity.lon, amenity.lat);
       console.log(`This is lng: ${myLon}`);
-      //debugger;
-      $("#parks_list").append(
+      $("#amenities_list").append(
         `<li><a id="to_map_display" href="#">
-          ${park_name[0]}
+          ${amenity_name[0]}
           <span id="${index}" class="ui-li-count"></span>
-          <p><strong>${park_name[1]}</strong></p>
-          <p><strong>${park_name[2]}</strong></p>
+          <p><strong>${amenity_name[1]}</strong></p>
+          <p><strong>${amenity_name[2]}</strong></p>
           </a></li>`
       );
     });
     //Refresh the list content
-    $("#parks_list").listview("refresh");
+    $("#amenities_list").listview("refresh");
   }
 }
-function distanceToPark(y0,x0,y1,x1){
+function distanceToamenity(y0,x0,y1,x1){
   //var φ1 = lat1.toRadians(), φ2 = lat2.toRadians(), Δλ = (lon2-lon1).toRadians(), R = 6371e3; // gives d in metres
 //var d = Math.acos( Math.sin(φ1)*Math.sin(φ2) + Math.cos(φ1)*Math.cos(φ2) * Math.cos(Δλ) ) * R;
 
