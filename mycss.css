@@ -1,4 +1,16 @@
-.CSSTableGenerator{
-   
+.amenity_table{
+    width: 100%;
+    padding: 0.2em;
+    font-size: 1.3em;
+    font-size-adjust: initial;
+    border: 0.1em solid #e0dfdf;
 }
-tr:nth-child(even) {background-color: #f2f2f2;}
+tr:nth-child(even) {background-color: #f2f2f2;
+color: #7b7b7c;}
+tr:active{
+    font-size: 1.3em;
+}
+tr{
+    height: 2rem;
+}
+

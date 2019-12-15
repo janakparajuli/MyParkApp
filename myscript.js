@@ -2,14 +2,16 @@ $access_key="bd628cc94539482fb9fd50afd7b06976";
 //871cbf254c2d49dd9da20f9e88229e7c
 let currentamenity;
 $.fn.highlight = function() {
-  this.css({ "background-color": "rgb(245, 228, 181)" });
+  this.css({ "background-color": "#7b7b7c;" });
 };
 $("#refresh").highlight();
 $("#refresh").animate({
-  width: "9em",
-  height: "1.5em"
+  width: "8em",
+  height: "2.5em"
 });
 let url, myLat, myLon;
+// const APIKEY='bd628cc94539482fb9fd50afd7b06976';
+const APIKEY='871cbf254c2d49dd9da20f9e88229e7c';
 //amenity_url=https://nominatim.openstreetmap.org/search.php?q=amenities&format=json&polygon_geojson=1&viewbox=
 $(document).on("click", "#refresh", function() {
   //Prevent the usual navigation behaviour
@@ -20,14 +22,14 @@ $(document).on("click", "#refresh", function() {
     textVisible: true
   });
   $.ajax({
-    //Get location
-    url: navigator.geolocation.getCurrentPosition(getLocation),
+    //Get location, ipgeolocation doesn't work on brave so include not supported messsage
+    //url: navigator.geolocation.getCurrentPosition(getLocation),
+    url:"https://api.ipgeolocation.io/ipgeo?apiKey=" + APIKEY+'&ip=93.176.158.114',
     //on success
     success: function(data){
       let search_url, slide_url, query_url,query_amenity='';
       $distance=$('#slider-1')[0].value;
-      myLon=lng;myLat=lat;
-      console.log(`My myLon myLat is ${myLon} and ${myLat}`);
+      myLon=data.longitude;myLat=data.latitude;
       $viewbox=computeViewBox(myLon,myLat,$distance);
       //Access from search bar
       $amenity=$('#select-custom-2')[0].value;
@@ -57,9 +59,7 @@ $(document).on("click", "#refresh", function() {
       slide_url=`https://nominatim.openstreetmap.org/search.php?q=${query_amenity}&format=json&polygon_geojson=1&viewbox=${$viewbox}&bounded=1`;
       if($place!=""){
         query_url=search_url;
-        console.log(`sending search url`);
       }else{query_url=slide_url;
-        console.log(`sending slide url`);
       }
 
   $.ajax({
@@ -93,7 +93,7 @@ $(document).on("pagebeforeshow", "#home", function() {
     // currentamenity = amenities[e.target.children[0].id];
     currentamenity = amenities[e.currentTarget.children[0].id];
     //Change to map_display page
-    $.mobile.changePage("#map_display");
+    $.mobile.changePage("#map_display",{ transition: "pop"});
   });
 });
 let map, dir;
@@ -141,16 +141,13 @@ $(document).on("pagebeforeshow", "#map_display", function(e) {
       type: "GET",
       url: url,
       success: function(d) {
-        console.log("This is d:" + d);
         $.mobile.loading("hide");
         map.invalidateSize();
         amenityCoordinates=d.centroid.coordinates;
         backUpAmenityCoordinatesLonLat=amenityCoordinates;
         //amenityCoordinatesLon=d.centroid.coordinates.reverse();
-        console.log(`The amenity coor lon lat is: ${amenityCoordinates} and that lon latis:`);
         // map.setView(d.centroid.coordinates);
         map.setView(amenityCoordinates.reverse());
-        console.log(`Now the amenity lon lat is: ${amenityCoordinates}`);
         markPoint=[myLat,myLon];
         let myPos=L.marker(markPoint).bindPopup("I am here").openPopup();
         myPos.addTo(map);
@@ -161,15 +158,14 @@ $(document).on("pagebeforeshow", "#map_display", function(e) {
         map.addLayer(amenity);
 
         amenity.on("click", function() {
-          $.mobile.changePage("#amenity_details");
+          console.log(`the id is: ${this.id}`);
+          $.mobile.changePage("#amenity_details",{ transition: "pop"});
         });
-        // console.log("This is my lat for routing"+myLat);
         //a = [L.latLng(myLat,myLon),L.latLng(d.centroid.coordinates)]
         //routingControl.setWaypoints(a)
         $("#dir-btn").on("click",function(){
           map.setView([myLat,myLon]);
           $waypoints=[L.latLng(myLat,myLon),L.latLng(amenityCoordinates)];
-          console.log('This is waypoints: '+$waypoints);
           routingControl.setWaypoints($waypoints);
         });
 
@@ -184,7 +180,7 @@ $(document).on("pagebeforeshow", "#map_display", function(e) {
 //https://nominatim.openstreetmap.org/details.php?osmtype=W&osmid=33884330&class=leisure
 $(document).on("pagebeforeshow", "#amenity_details", function(e) {
   e.preventDefault();
-  if($('.CSSTableGenerator')!=null){$('.CSSTableGenerator').remove();}
+  if($('.amenity_table')!=null){$('.amenity_table').remove();}
   $(function() {
     $.mobile.loading("show", {
       text: "Fetching Details",
@@ -239,7 +235,6 @@ $(document).on("pagebeforeshow", "#amenity_details", function(e) {
         ];
         var dataObj = {};
         for (let i = 0; i < data[0].length; i++) {
-          // console.log(i);
           dataObj[data[0][i]] = data[1][i];
         }
         makeTable($("#detail"), dataObj);
@@ -256,15 +251,17 @@ $(document).on("pagebeforeshow", "#amenity_details", function(e) {
 
 //Define a function to create a table
 function makeTable(container, dataObj) {
-  var table = $("<table/>").addClass("CSSTableGenerator");
+  let table = $("<table/>").addClass("amenity_table");
 
   $.each(dataObj, function(rowIndex, r) {
-      var row = $("<tr/>");
+      let row = $("<tr/>");
       row.append($("<t" + (rowIndex == 0 ? "h" : "d") + "/>").text(rowIndex));
       row.append($("<t" + (rowIndex == 0 ? "h" : "d") + "/>").text(r));
     
     table.append(row);
   });
+  let link= $(`<a href="#home" data-transition='flip' data-direction="" data-add-back-btn="true">Home</a>`);
+  table.append(link);
   return container.append(table);
 }
 //$key='b6907d289e10d714a6e88b30761fae22';
@@ -289,22 +286,18 @@ function computeViewBox(y0,x0,d){
 
   // //Assign the bounding box to vb;
   $vb.push($lngleft, $lattop, $lngright,$latdown);
-  console.log(`The bb is: ${$vb}`);
   return $vb;
 }
 //Populate List method
 function PopulateList(data) {
   for (let i = 0; i < data.length; i++) {
-    //console.log(data[i].display_name);
     amenities = data;
     //Remove Previous Stations
     $("#amenities_list li").remove();
     //Add new stations to the list
-    //console.log(stations);
     $.each(amenities, function(index, amenity) {
       let amenity_name = amenity.display_name.split(",");
       let distance=distanceToamenity(myLon,myLat, amenity.lon, amenity.lat);
-      console.log(`This is lng: ${myLon}`);
       $("#amenities_list").append(
         `<li><a id="to_map_display" href="#">
           ${amenity_name[0]}
@@ -323,13 +316,13 @@ function distanceToamenity(y1,x1,y2,x2){
 //var d = Math.acos( Math.sin(φ1)*Math.sin(φ2) + Math.cos(φ1)*Math.cos(φ2) * Math.cos(Δλ) ) * R;
   const R=6371;
   let d;
-  let φ1 = x1*(Math.PI/180);
-  let φ2 = x2*(Math.PI/180);
-  let λ1 = y1*(Math.PI/180);
-  let λ2 = y2*(Math.PI/180);
+  let phi1 = x1*(Math.PI/180);
+  let phi2 = x2*(Math.PI/180);
+  let lambda1 = y1*(Math.PI/180);
+  let lambda2 = y2*(Math.PI/180);
 
-  let Δλ = λ2-λ1;
-  d=Math.acos( Math.sin(φ1)*Math.sin(φ2) + Math.cos(φ1)*Math.cos(φ2) * Math.cos(Δλ)) * R;
+  let dellambda = lambda2-lambda1;
+  d=Math.acos( Math.sin(phi1)*Math.sin(phi2) + Math.cos(phi1)*Math.cos(phi2) * Math.cos(dellambda)) * R;
   return d;
 
 }
