@@ -4,6 +4,7 @@
     font-size: 1.3em;
     font-size-adjust: initial;
     border: 0.1em solid #e0dfdf;
+    margin-top: 2em;
 }
 tr:nth-child(even) {background-color: #f2f2f2;
 color: #7b7b7c;}
@@ -14,21 +15,3 @@ tr{
     height: 2rem;
 }
 
-/* .ui-page .ui-header{
-    background: lightblue;
-} */
-/* #label-1, #label-2, #label-3, #text-4{
-    display: none;
-} */
-/* #slider-1, #select-custom-2{
-    display: none;
-}
-.refresh{
-    display: none;
-} */
-/* #dynamic-slider-form{
-     display: none; 
-} */
-/* .show{
-    display: initial;
-} */

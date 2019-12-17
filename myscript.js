@@ -13,15 +13,18 @@ $(".refresh").animate({
 });
 //Define the api key for accessing ipgeolocation
 const APIKEY='871cbf254c2d49dd9da20f9e88229e7c';
+
+//Hide few features before loading home
 $(".class1").hide();
   $(".class2").hide();
+  //Show first class on clicking search by distance
 $(document).on("click", "#distance_nav" ,function(){
   //debugger;
   $(".class1").show();
   $(".class2").hide();
-  $whichpage = 'distance';
+  $whichpage = 'distance';    //store page location on a variables
 });
-
+//Show second class on clicking search by place name
 $(document).on("click", "#place_nav" ,function(){
   //debugger;
   $(".class1").hide();
@@ -44,15 +47,14 @@ $(document).on("click", ".refresh", function() {
     url:"https://api.ipgeolocation.io/ipgeo?apiKey=" + APIKEY,
     //after getting the location, define query
     success: function(data){
+      //define some variables
       let search_url, slide_url, query_url, query_amenity='';
       $distance=$('#slider-1')[0].value;
       myLon=data.longitude;myLat=data.latitude;
       $viewbox=computeViewBox(myLon,myLat,$distance);
-      // let $amenityval1=0, $amenityval2=0;
-      //Access the value of user selection
+      //Access the value of user selection as per distance or place name
       $amenity=($whichpage=="distance")?$('#select-custom-2')[0].value:$('#select-custom-3')[0].value;
-      // $amenityval2=$('#select-custom-3')[0].value;
-      // $amenity=$amenityval1!=0?$amenityval1:$amenityval2;
+      // Make sure it is integer
       $amenity=parseInt($amenity);
       //Prepare query according to the user choice of amenity
       switch($amenity) {
@@ -80,13 +82,16 @@ $(document).on("click", ".refresh", function() {
       search_url=`https://nominatim.openstreetmap.org/search.php?q=${query_amenity}+in+${$place}&format=json&polygon_geojson=1`;
       //Declare url based in the distance from user's position
       slide_url=`https://nominatim.openstreetmap.org/search.php?q=${query_amenity}&format=json&polygon_geojson=1&viewbox=${$viewbox}&bounded=1`;
+      //Choose the url, if query came from search by distance button
       if($whichpage=="distance"){
         query_url=slide_url;
         }
+        //or if it came from search by place 
       else if($whichpage="place"){
         if($place!=""){
         query_url=search_url;
         } else{
+          //if place name is not typed then alert a message
           alert("Please enter a place name and click refresh");
       }
       }
@@ -203,13 +208,16 @@ $(document).on("pagebeforeshow", "#map_display", function(e) {
         });
         //on clicking get direction button, calculate the route
         $("#dir-btn").on("click",function(){
-          map.setView([myLat,myLon]);
-          //debugger;
+          //Remove any, if there is pre calculated route
           if(undefined!=$waypoints){
            map.removeControl(routingControl);
             // routingControl.remove();
             $waypoints=undefined;
+           map.setView(amenityCoordinates);
+
           }else{
+            //If there is no route, calculate the route and change the set view to user position
+          map.setView([myLat,myLon]);
           routingControl=backuproutingControl;
           $waypoints=[L.latLng(myLat,myLon),L.latLng(amenityCoordinates)];
           routingControl.setWaypoints([L.latLng(myLat,myLon),L.latLng(amenityCoordinates)]);
@@ -236,17 +244,20 @@ $(document).on("pagebeforeshow", "#amenity_details", function(e) {
     });
    
     let url;
+    //handle current amenity issue, if there is no any, get some defaults
     if (typeof currentamenity !== "undefined") {
       url = `https://nominatim.openstreetmap.org/details.php?osmtype=${currentamenity.osm_type[0].toUpperCase()}&osmid=${currentamenity.osm_id}&format=json`;
 
     } else {
       url = `https://nominatim.openstreetmap.org/details.php?osmtype=W&osmid=123759217&format=json`;
     }
+    //get amenity data using jquery ajax
     $.ajax({
       type: "GET",
       url: url,
       success: function(d) {
         $.mobile.loading("hide");
+        //Declare data to show
         let data = [
           [
             "Name",
@@ -285,6 +296,7 @@ $(document).on("pagebeforeshow", "#amenity_details", function(e) {
         for (let i = 0; i < data[0].length; i++) {
           dataObj[data[0][i]] = data[1][i];
         }
+        //Arrange the data in the form of table
         makeTable($("#detail"), dataObj);
         //amenityDescription(d);
         // $('#map').append($(d));
@@ -308,17 +320,18 @@ function makeTable(container, dataObj) {
     
     table.append(row);
   });
-  let link= $(`<a href="#home" data-transition='flip' data-direction="" data-add-back-btn="true">Home</a>`);
+  //Insert a home button/link
+  let link= $(`<a href="#home" data-icon="home" data-transition='flip' data-direction="" data-add-back-btn="true">Go Home</a>`);
   table.append(link);
   return container.append(table);
 }
 //$key='b6907d289e10d714a6e88b30761fae22';
-//Define a funciton to get location
-function getLocation(position){
-  lat=position.coords.latitude;
-  lng=position.coords.longitude;
-  return lat, lng;
-}
+//Define a funciton to get location, 
+// function getLocation(position){
+//   lat=position.coords.latitude;
+//   lng=position.coords.longitude;
+//   return lat, lng;
+// }
 
 //Define a function to compute the viewbox
 function computeViewBox(y0,x0,d){
