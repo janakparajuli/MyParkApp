@@ -14,4 +14,7 @@ tr:active{
 tr{
     height: 2rem;
 }
-
+#map{
+    margin: 2.5em;
+    border: 0.3em solid lightgrey;
+}

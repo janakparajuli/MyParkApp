@@ -86,7 +86,7 @@ $(document).on("click", ".refresh", function() {
       if($whichpage=="distance"){
         query_url=slide_url;
         }
-        //or if it came from search by place 
+        //or if it came from search by place
       else if($whichpage="place"){
         if($place!=""){
         query_url=search_url;
@@ -143,7 +143,8 @@ let map, $waypoints;
 //Initialize the map at a zoom level and a centre
 map = L.map("map", {
   zoom: 15,
-  center: [41.43401555, 2.11618445]
+  center: [41.43401555, 2.11618445],
+  zoomControl:true
 });
 //Add osm tile layer on the map
 L.tileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {

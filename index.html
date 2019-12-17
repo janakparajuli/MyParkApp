@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>My Amenity App</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
     <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
         <!--Leaflet Routing Machine css-->
@@ -92,12 +91,7 @@
                 <a href="#home" data-icon="arrow-l" data-transition='flip' data-direction="reverse" data-add-back-btn="true">Back</a>
                 <a href="#" id="dir-btn" data-icon="check">Toggle Direction</a>
         </div>
-        <div data-role="content">
-            <!-- <h4 id="amenityName"></h4> -->
-            <div>
-            <!-- class="leaflet-top leaflet-right" id="custom-border-radius" -->
-                <!-- <button id="dir-btn" class="ui-btn ui-btn-a">Get Direction</button> -->
-            </div>
+        <div id='map-content' data-role="content">
             <div id='map'>
 
             </div>
