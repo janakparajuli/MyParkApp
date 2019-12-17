@@ -1,39 +1,60 @@
 $access_key="bd628cc94539482fb9fd50afd7b06976";
-//871cbf254c2d49dd9da20f9e88229e7c
-let currentamenity;
+//Define some global variables
+let currentamenity, url, myLat, myLon;
+//Add some css to refresh button
 $.fn.highlight = function() {
   this.css({ "background-color": "#7b7b7c;" });
 };
-$("#refresh").highlight();
-$("#refresh").animate({
+$(".refresh").addClass("refresh");
+$(".refresh").highlight();
+$(".refresh").animate({
   width: "8em",
   height: "2.5em"
 });
-let url, myLat, myLon;
-// const APIKEY='bd628cc94539482fb9fd50afd7b06976';
+//Define the api key for accessing ipgeolocation
 const APIKEY='871cbf254c2d49dd9da20f9e88229e7c';
-//amenity_url=https://nominatim.openstreetmap.org/search.php?q=amenities&format=json&polygon_geojson=1&viewbox=
-$(document).on("click", "#refresh", function() {
+$(".class1").hide();
+  $(".class2").hide();
+$(document).on("click", "#distance_nav" ,function(){
+  //debugger;
+  $(".class1").show();
+  $(".class2").hide();
+  $whichpage = 'distance';
+});
+
+$(document).on("click", "#place_nav" ,function(){
+  //debugger;
+  $(".class1").hide();
+  $(".class2").show();
+  $whichpage = 'place';
+});
+
+//on clicking the refresh, display the list of amenities
+$(document).on("click", ".refresh", function() {
   //Prevent the usual navigation behaviour
   event.preventDefault();
-  // get the API result via jQuery.ajax
+  //Show mobile loading message
   $.mobile.loading("show", {
     text: "Loading Amenities",
     textVisible: true
   });
+    // get the API result via jQuery.ajax
   $.ajax({
-    //Get location, ipgeolocation doesn't work on brave so include not supported messsage
     //url: navigator.geolocation.getCurrentPosition(getLocation),
-    url:"https://api.ipgeolocation.io/ipgeo?apiKey=" + APIKEY+'&ip=93.176.158.114',
-    //on success
+    url:"https://api.ipgeolocation.io/ipgeo?apiKey=" + APIKEY,
+    //after getting the location, define query
     success: function(data){
-      let search_url, slide_url, query_url,query_amenity='';
+      let search_url, slide_url, query_url, query_amenity='';
       $distance=$('#slider-1')[0].value;
       myLon=data.longitude;myLat=data.latitude;
       $viewbox=computeViewBox(myLon,myLat,$distance);
-      //Access from search bar
-      $amenity=$('#select-custom-2')[0].value;
+      // let $amenityval1=0, $amenityval2=0;
+      //Access the value of user selection
+      $amenity=($whichpage=="distance")?$('#select-custom-2')[0].value:$('#select-custom-3')[0].value;
+      // $amenityval2=$('#select-custom-3')[0].value;
+      // $amenity=$amenityval1!=0?$amenityval1:$amenityval2;
       $amenity=parseInt($amenity);
+      //Prepare query according to the user choice of amenity
       switch($amenity) {
         case 1:
           query_amenity='park';
@@ -53,90 +74,109 @@ $(document).on("click", "#refresh", function() {
         default:
           query_amenity='amenity';
       }
+      //Access the place name from user
       $place=$('#text-4')[0].value;
-
+      //Declare  url based on amenity and place from user
       search_url=`https://nominatim.openstreetmap.org/search.php?q=${query_amenity}+in+${$place}&format=json&polygon_geojson=1`;
+      //Declare url based in the distance from user's position
       slide_url=`https://nominatim.openstreetmap.org/search.php?q=${query_amenity}&format=json&polygon_geojson=1&viewbox=${$viewbox}&bounded=1`;
-      if($place!=""){
+      if($whichpage=="distance"){
+        query_url=slide_url;
+        }
+      else if($whichpage="place"){
+        if($place!=""){
         query_url=search_url;
-      }else{query_url=slide_url;
+        } else{
+          alert("Please enter a place name and click refresh");
+      }
       }
 
+      //Get the api result via jquery ajax
   $.ajax({
     type: "GET",
     url: query_url,
     data: {
-       //format: "json",
-       //q: "amenities"
+
      },
-    //dataType: 'jsonp',
+    //Load the amenities list on success
     success: function(data) {
       $.mobile.loading("hide");
       PopulateList(data);
       $("#amenities_list").show();
     },
+    //on failure display the failure message
     fail: function() {
       $.mobile.loading("hide");
       alert("request failed");
     }
-  });}
+  });
+},
+//on failure display the failure message
+  fail: function() {
+    $.mobile.loading("hide");
+    alert("request failed");
+  }
 });
 });
 
 //Navigate to map_display
 $(document).on("pagebeforeshow", "#home", function() {
+  //hide previously loaded amenities list
   $("#amenities_list").hide();
   $(document).on("click", "#to_map_display", function(e) {
+    //prevent default loading
     e.preventDefault();
     e.stopImmediatePropagation();
-    //store some data
-    // currentamenity = amenities[e.target.children[0].id];
+    // store currentamenity data
     currentamenity = amenities[e.currentTarget.children[0].id];
-    //Change to map_display page
+    //Change to map_display page transiting with pop
     $.mobile.changePage("#map_display",{ transition: "pop"});
   });
 });
-let map, dir;
+//define map variables
+let map, $waypoints;
+//Initialize the map at a zoom level and a centre
 map = L.map("map", {
   zoom: 15,
   center: [41.43401555, 2.11618445]
-  //center:[57.74, 11.94] //map quest
-  // center: [-0.0380158229338167,39.9927254 ] 2.11618445,41.43401555
 });
-
+//Add osm tile layer on the map
 L.tileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution:
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   subdomains: ["a", "b", "c"]
 }).addTo(map);
-
+//Add leaflet routing machine for calulating the route direction
 routingControl = L.Routing.control({
-  router: L.Routing.mapbox("pk.eyJ1IjoiamFuYWtwYXJhanVsaSIsImEiOiJjaWdtMWd2eWUwMjRvdXJrcjVhbTFvcmszIn0.jRIRtmgCm5waI7RXih3t5A"),
+  router: L.Routing.mapbox("pk.eyJ1IjoiamFuYWtwYXJhanVsaSIsImEiOiJjaWdtMWd2eWUwMjRvdXJrcjVhbTFvcmszIn0.jRIRtmgCm5waI7RXih3t5A"),    //routing api key for mapbox
   waypoints: [
     //L.latLng(41.43401555, 2.11618445),
     L.latLng(41.43451555, 2.11658445)
   ],
-  routeWhileDragging:true
-}).addTo(map);
+  routeWhileDragging:true   //calculates routes on the fly
+});
+backuproutingControl=routingControl;
 
-
+//do something before the page actually loads
 $(document).on("pagebeforeshow", "#map_display", function(e) {
+  //prevent default loading
   e.preventDefault();
   //$(document).ready(function() {
+    //new syntax of ready function
   $(function() {
-
+    //display loading message on mobile
     $.mobile.loading("show", {
       text: "Fetching API",
       textVisible: true
     });
     let url;
-
+    //assign a default value to the url if it is undefined
     if (typeof currentamenity !== "undefined") {
-
       url = `https://nominatim.openstreetmap.org/details.php?osmtype=${currentamenity.osm_type[0].toUpperCase()}&osmid=${currentamenity.osm_id}&format=json&polygon_geojson=1`;
     } else {
       url = `https://nominatim.openstreetmap.org/details.php?osmtype=W&osmid=33884330&format=json&polygon_geojson=1`;
     }
+    //Get the api result via jquery ajax
     $.ajax({
       type: "GET",
       url: url,
@@ -144,33 +184,41 @@ $(document).on("pagebeforeshow", "#map_display", function(e) {
         $.mobile.loading("hide");
         map.invalidateSize();
         amenityCoordinates=d.centroid.coordinates;
+        //keep a back up of lon lat coordinates for future, in case if needed
         backUpAmenityCoordinatesLonLat=amenityCoordinates;
-        //amenityCoordinatesLon=d.centroid.coordinates.reverse();
-        // map.setView(d.centroid.coordinates);
+        //on loading set the center to the amenity
         map.setView(amenityCoordinates.reverse());
         markPoint=[myLat,myLon];
+        //add user position and amenity markers
         let myPos=L.marker(markPoint).bindPopup("I am here").openPopup();
         myPos.addTo(map);
         let amenityPos=L.marker(d.centroid.coordinates).bindPopup(d.localname).openPopup();
         amenityPos.addTo(map);
-
+        //add amenity geometry on the map
         amenity = L.geoJSON(d.geometry);
         map.addLayer(amenity);
-
+        //on clicking the amenity go to next page
         amenity.on("click", function() {
-          console.log(`the id is: ${this.id}`);
           $.mobile.changePage("#amenity_details",{ transition: "pop"});
         });
-        //a = [L.latLng(myLat,myLon),L.latLng(d.centroid.coordinates)]
-        //routingControl.setWaypoints(a)
+        //on clicking get direction button, calculate the route
         $("#dir-btn").on("click",function(){
           map.setView([myLat,myLon]);
+          //debugger;
+          if(undefined!=$waypoints){
+           map.removeControl(routingControl);
+            // routingControl.remove();
+            $waypoints=undefined;
+          }else{
+          routingControl=backuproutingControl;
           $waypoints=[L.latLng(myLat,myLon),L.latLng(amenityCoordinates)];
-          routingControl.setWaypoints($waypoints);
+          routingControl.setWaypoints([L.latLng(myLat,myLon),L.latLng(amenityCoordinates)]);
+          map.addControl(routingControl);
+        }
         });
 
       },
-      fail: function(xhr, textStatus, errorThrown) {
+      fail: function() {
         $.mobile.loading("hide");
         alert("request failed");
       }
@@ -311,6 +359,8 @@ function PopulateList(data) {
     $("#amenities_list").listview("refresh");
   }
 }
+// It performs a geometric algorithm to determine the distance between two coordinates.
+// It is adapted from a script provided by Moveable Type (http://www.movable-type.co.uk/scripts/latlong.html) under a Creative Commons license (http://creativecommons.org/licenses/by/3.0/):
 function distanceToamenity(y1,x1,y2,x2){
   //var φ1 = lat1.toRadians(), φ2 = lat2.toRadians(), Δλ = (lon2-lon1).toRadians(), R = 6371e3; // gives d in metres
 //var d = Math.acos( Math.sin(φ1)*Math.sin(φ2) + Math.cos(φ1)*Math.cos(φ2) * Math.cos(Δλ) ) * R;

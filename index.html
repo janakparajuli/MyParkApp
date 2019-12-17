@@ -34,30 +34,52 @@
 
 <body>
     <div data-role="page" id="home">
-        <div data-role="header">
-            <h1>My Amenity App</h1>
-        </div>
+            <div data-role="header" style="overflow:hidden; background: lightblue;">
+                    <h1>My Amenity App</h1>
+                    <div data-role="navbar" data-iconpos="left">
+                            <ul>
+                              <li><a href="#" id="distance_nav" data-icon="search">Search By Distance</a></li>
+                              <li><a href="#" id="place_nav" data-icon="search">Search By Place</a></li>
+                            </ul>
+                    </div><!-- /navbar -->
+            </div><!-- /header -->
+        
 
         <div data-role="content">
-            <form id="dynamic-slider-form">
-                <div class="ui-field-contain">
-                    <button href="#" id="refresh" data-icon="recycle" class="ui-btn-right">Refresh</button>
+            <form id="dynamic-slider-form1">
+                <div class="ui-field-contain class1">
+                    <button href="#" id="refresh1" data-icon="recycle" class="ui-btn-right refresh">Refresh</button>
                     <div>
-                        <label for="slider-1">Show Amenities Within(m):</label>
+                        <label id="label-1" for="slider-1">Show Amenities Within(m):</label>
                         <input type="range" name="slider-1" id="slider-1" data-highlight="true" min="0" max="15000"
-                        value="5000" step="500"></div>
-                </div>
-                <label for="select-custom-2">Amenity Name:</label>
-                <select name="select-custom-2" id="select-custom-2" data-native-menu="false" data-mini="true">
+                        value="5000" step="500">
+                    </div>
+                
+                <label id="label-2" for="select-custom-2">Amenity Name:</label>
+                <select name="select-custom-2" id="select-custom-2" class="select-custom" data-native-menu="false" data-mini="true">
                     <option value="1">Park</option>
                     <option value="2">Hospital</option>
                     <option value="3">Pub</option>
                     <option value="4">Hotel</option>
                     <option value="5">School</option>
                 </select>
-                <label for="text-4">Place Name:</label>
-                <input type="text" data-clear-btn="true" data-mini="true" name="text-4" id="text-4" placeholder="enter place name and click refresh">
+                </div>
             </form>
+            <form id="dynamic-slider-form2">
+             <div class="ui-field-contain class2">
+                <button href="#" id="refresh2" data-icon="recycle" class="ui-btn-right refresh">Refresh</button>
+            <div><label id="label-2" for="select-custom-3">Amenity Name:</label>
+                <select name="select-custom-3" id="select-custom-3" class="select-custom" data-native-menu="false" data-mini="true">
+                    <option value="1">Park</option>
+                    <option value="2">Hospital</option>
+                    <option value="3">Pub</option>
+                    <option value="4">Hotel</option>
+                    <option value="5">School</option>
+                </select>
+                <label id="label-3" for="text-4">Place Name:</label>
+                <input type="text" id="text-4" data-clear-btn="true" data-mini="true" name="text-4"  placeholder="enter place name and click refresh">
+            </div>
+        </div></form>
             <ul id="amenities_list" data-role="listview" data-filter="false" data-autodividers="false"
                 data-filter-placeholder="Search amenities..." data-inset="true">
 
@@ -72,7 +94,7 @@
         </div>
         <div data-role="content">
             <!-- <h4 id="amenityName"></h4> -->
-            <div> 
+            <div>
             <!-- class="leaflet-top leaflet-right" id="custom-border-radius" -->
                 <!-- <button id="dir-btn" class="ui-btn ui-btn-a">Get Direction</button> -->
             </div>
